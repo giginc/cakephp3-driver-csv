@@ -1,0 +1,25 @@
+{
+    "name": "giginc/cakephp3-driver-csv",
+    "description": "An CSV datasource for CakePHP 3.0",
+    "type": "cakephp-plugin",
+    "require": {
+        "php": "^5.4|^7.0",
+        "cakephp/cakephp": "^3.5"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "kgws",
+            "email": "kagawa@giginc.co.jp"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Giginc\\Csv\\": "src/",
+            "Giginc\\Csv\\Test\\": "tests/"
+        }
+    }
+}
