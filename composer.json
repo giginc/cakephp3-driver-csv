@@ -2,6 +2,11 @@
     "name": "giginc/cakephp3-driver-csv",
     "description": "An CSV datasource for CakePHP 3.0",
     "type": "cakephp-plugin",
+    "keywords": [
+        "cakephp",
+        "cakephp-plugin",
+        "csv"
+    ],
     "require": {
         "php": ">=5.6",
         "cakephp/cakephp": ">=3.5"

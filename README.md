@@ -110,5 +110,5 @@ id,category,name,price
 
 ## LICENSE
 
-[The MIT License (MIT) Copyright (c) 2013](http://opensource.org/licenses/MIT)
+[The MIT License (MIT) Copyright (c) 2020](http://opensource.org/licenses/MIT)
 
