@@ -48,10 +48,7 @@ class Csv
      *
      */
     protected $_baseConfig = [
-        'path' => '', // local path on the server relative to WWW_ROOT
-        'delimiter' => ',',
-        'length' => 1000,
-        'headerRow' => 0,
+        'baseDir' => CONFIG,
     ];
 
     /**
@@ -76,7 +73,7 @@ class Csv
      * @return array
      * @access public
      */
-    public function config()
+    public function getConfig()
     {
         return $this->_config;
     }
@@ -87,17 +84,19 @@ class Csv
      * @return bool
      * @access public
      */
-    public function connect()
+    public function connect($name)
     {
         try {
-            if (file_exists($this->_config['path'])) {
-                if (($this->_file = fopen($this->_config['path'], "r+")) === false) {
-                    trigger_error("Could not open file.{$this->_config['path']}");
+            $path = realpath($this->_config['baseDir']). DIRECTORY_SEPARATOR. $name. ".csv";
+
+            if (file_exists($path)) {
+                if (($this->_file = fopen($path, "r+")) === false) {
+                    trigger_error("Could not open file.{$path}");
 
                     return false;
                 }
             } else {
-                trigger_error("The specified file was not found.{$this->_config['path']}");
+                trigger_error("The specified file was not found.{$path}");
 
                 return false;
             }
@@ -115,10 +114,10 @@ class Csv
      *
      * @access public
      */
-    public function getConnection()
+    public function getConnection($name)
     {
         if (!$this->isConnected()) {
-            $this->connect();
+            $this->connect($name);
         }
 
         return $this->_file;
@@ -137,7 +136,7 @@ class Csv
 
             unset($this->_file, $this->connection);
 
-            return !$this->connected;
+            return $this->connected = false;
         }
 
         return true;
