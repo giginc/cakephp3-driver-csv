@@ -1,7 +1,7 @@
-Json Driver for Cakephp3
+Csv Driver for Cakephp3
 ========
 
-An Json datasource for CakePHP 3.5,3.6,3.7
+An Csv datasource for CakePHP 3.5,3.6,3.7
 
 ## Installing via composer
 
@@ -27,7 +27,7 @@ Now, you need to set the connection in your config/app.php file:
 ```
 
 ## Models
-After that, you need to load Giginc\Json\ORM\Table in your tables class:
+After that, you need to load Giginc\Csv\ORM\Table in your tables class:
 
 ```php
 //src/Model/Table/ProductsTable.php
