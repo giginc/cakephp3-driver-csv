@@ -14,6 +14,8 @@ class Table extends CakeTable
     // csv driver
     protected $_driver = null;
 
+    protected $_file = null;
+
     protected $_primaryKey = 0;
 
     protected $_fileLength = 0;
@@ -45,9 +47,24 @@ class Table extends CakeTable
         if (!$this->_driver instanceof Csv) {
             throw new Exception("Driver must be an instance of 'Giginc\Csv\Database\Driver\Csv'");
         }
-        $file = $this->_driver->getConnection($this->getTable());
+        // get schema
+        $this->_file = $this->_driver->getConnection($this->getTable());
+        $this->_schema = $this->getSchema();
+        $this->_disconnect();
 
-        return $file;
+        // get connection
+        $this->_file = $this->_driver->getConnection($this->getTable());
+        return $this->_file;
+    }// }}}
+
+    /** {{{ query
+     * Creates a new Query instance for a table.
+     *
+     * @return \Cake\ORM\Query
+     */
+    public function query()
+    {
+        return $this->_getConnection();
     }// }}}
 
     /** {{{ _disconnect
@@ -116,10 +133,8 @@ class Table extends CakeTable
     public function getSchema()
     {
         if ($this->_schema === null) {
-            $file = $this->_getConnection();
-
             $row = 1;
-            while (($data = fgetcsv($file, $this->_fileLength, $this->_delimiter)) !== FALSE) {
+            while (($data = fgetcsv($this->_file, $this->_fileLength, $this->_delimiter)) !== FALSE) {
                 // if $this->_schemaRow is 0 then the column number become this schema.
                 if ($this->_schemaRow === 0) {
                     $res = [];
@@ -128,14 +143,12 @@ class Table extends CakeTable
                         $res[$i] = $i;
                     }
 
-                    $this->_disconnect();
                     return $res;
                 }
 
                 if ($row == $this->_schemaRow) {
                     $this->_schema = $data;
 
-                    $this->_disconnect();
                     return $this->_schema;
                 }
                 $row++;
@@ -198,9 +211,8 @@ class Table extends CakeTable
      */
     public function get($primaryKey, $options = [])
     {
-        $schema = $this->getSchema();
-        $file = $this->_getConnection();
-        $primaryColumNumber = array_search($this->_primaryKey, $schema);
+        $file = $this->query();
+        $primaryColumNumber = array_search($this->_primaryKey, $this->_schema);
         $row = 1;
         $response = [];
         while (($data = fgetcsv($file, $this->_fileLength, $this->_delimiter)) !== FALSE) {
@@ -209,7 +221,7 @@ class Table extends CakeTable
                 continue; // skip schema row
             }
             if (isset($data[$primaryColumNumber]) && $data[$primaryColumNumber] == $primaryKey) {
-                foreach ($schema as $key => $value) {
+                foreach ($this->_schema as $key => $value) {
                     $response[$value] = $data[$key];
                 }
 
