@@ -31,10 +31,8 @@ class Csv
      * @var File
      * @access protected
      */
-    protected $_file = null;
+    protected $_csv = null;
 
-
-    protected $_fileHeader  = null;
 
     /**
      * Base Config
@@ -90,7 +88,7 @@ class Csv
             $path = realpath($this->_config['baseDir']). DIRECTORY_SEPARATOR. $name. ".csv";
 
             if (file_exists($path)) {
-                if (($this->_file = fopen($path, "r+")) === false) {
+                if (($this->_csv = new \SplFileObject($path)) === false) {
                     trigger_error("Could not open file.{$path}");
 
                     return false;
@@ -101,6 +99,12 @@ class Csv
                 return false;
             }
 
+            $this->_csv->setFlags(
+                \SplFileObject::READ_CSV
+                | \SplFileObject::READ_AHEAD
+                | \SplFileObject::SKIP_EMPTY
+                | \SplFileObject::DROP_NEW_LINE
+            );
             $this->connected = true;
         } catch (Exception $e) {
             trigger_error($e->getMessage());
@@ -120,7 +124,7 @@ class Csv
             $this->connect($name);
         }
 
-        return $this->_file;
+        return $this->_csv;
     }
 
     /**
@@ -132,9 +136,7 @@ class Csv
     public function disconnect()
     {
         if ($this->connected) {
-            fclose($this->_file);
-
-            unset($this->_file, $this->connection);
+            unset($this->_csv, $this->connection);
 
             return $this->connected = false;
         }

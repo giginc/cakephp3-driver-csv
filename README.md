@@ -49,7 +49,6 @@ class ProductsTable extends Table
         parent::initialize($config);
 
         $this->setPrimaryKey('id');
-        $this->setDelimiter(',');
         $this->setSchemaRow(1); // Schema row is 1 row.
         $this->setTable('products'); // load file is CONFIG/materials.csv
     }

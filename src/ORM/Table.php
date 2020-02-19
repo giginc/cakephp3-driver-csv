@@ -14,17 +14,9 @@ class Table extends CakeTable
     // csv driver
     protected $_driver = null;
 
-    protected $_file = null;
+    protected $_csv = null;
 
     protected $_primaryKey = 0;
-
-    protected $_fileLength = 0;
-
-    protected $_delimiter = ',';
-
-    protected $_enclosure = '"';
-
-    protected $_escape = "\\";
 
     protected $_schemaRow = 0;
 
@@ -47,14 +39,12 @@ class Table extends CakeTable
         if (!$this->_driver instanceof Csv) {
             throw new Exception("Driver must be an instance of 'Giginc\Csv\Database\Driver\Csv'");
         }
-        // get schema
-        $this->_file = $this->_driver->getConnection($this->getTable());
-        $this->_schema = $this->getSchema();
-        $this->_disconnect();
+        $this->_csv = $this->_driver->getConnection($this->getTable());
 
-        // get connection
-        $this->_file = $this->_driver->getConnection($this->getTable());
-        return $this->_file;
+        // get schema
+        $this->_schema = $this->getSchema();
+
+        return $this->_csv;
     }// }}}
 
     /** {{{ query
@@ -73,46 +63,6 @@ class Table extends CakeTable
     private function _disconnect()
     {
         $this->_driver->disconnect();
-    }// }}}
-
-    /** {{{ setFileLength
-     * Set file length
-     *
-     * @param integer $fileLength
-     */
-    public function setFileLength($fileLength)
-    {
-        $this->_fileLength = $fileLength;
-    }// }}}
-
-    /** {{{ setDelimiter
-     * Set delimiter
-     *
-     * @param string $delimiter
-     */
-    public function setDelimiter($delimiter)
-    {
-        $this->_delimiter = $delimiter;
-    }// }}}
-
-    /** {{{ setEnclosure
-     * Set enclosure
-     *
-     * @param string $enclosure
-     */
-    public function setEnclosure($enclosure)
-    {
-        $this->_enclosure = $enclosure;
-    }// }}}
-
-    /** {{{ setEscape
-     * Set escape
-     *
-     * @param string $escape
-     */
-    public function setEscape($escape)
-    {
-        $this->_escape = $escape;
     }// }}}
 
     /** {{{ setSchemaRow
@@ -134,7 +84,7 @@ class Table extends CakeTable
     {
         if ($this->_schema === null) {
             $row = 1;
-            while (($data = fgetcsv($this->_file, $this->_fileLength, $this->_delimiter)) !== FALSE) {
+            foreach ($this->_csv as $data) {
                 // if $this->_schemaRow is 0 then the column number become this schema.
                 if ($this->_schemaRow === 0) {
                     $res = [];
@@ -197,21 +147,16 @@ class Table extends CakeTable
      */
     public function find($type = 'all', $options = [])
     {
-        $file = $this->query();
-        $primaryColumNumber = array_search($this->_primaryKey, $this->_schema);
+        $csv = $this->query();
         $count = 1;
         $response = [];
-        while (($data = fgetcsv($file, $this->_fileLength, $this->_delimiter)) !== FALSE) {
+        foreach ($csv as $data) {
             if ($count === $this->_schemaRow) {
                 $count++;
                 continue; // skip schema row
             }
-            $row = [];
-            foreach ($this->_schema as $key => $value) {
-                $row[$value] = $data[$key];
-            }
 
-            $response[] = $row;
+            $response[] = array_combine($this->_schema, $data);
             $count++;
         }
         $this->_disconnect();
@@ -230,22 +175,17 @@ class Table extends CakeTable
      */
     public function get($primaryKey, $options = [])
     {
-        $file = $this->query();
+        $csv = $this->query();
         $primaryColumNumber = array_search($this->_primaryKey, $this->_schema);
         $count = 1;
         $response = [];
-        while (($data = fgetcsv($file, $this->_fileLength, $this->_delimiter)) !== FALSE) {
+        foreach ($csv as $data) {
             if ($count === $this->_schemaRow) {
                 $count++;
                 continue; // skip schema row
             }
             if (isset($data[$primaryColumNumber]) && $data[$primaryColumNumber] == $primaryKey) {
-                foreach ($this->_schema as $key => $value) {
-                    $response[$value] = $data[$key];
-                }
-
-                $this->_disconnect();
-                return $response;
+                return  array_combine($this->_schema, $data);
             }
             $count++;
         }
@@ -292,7 +232,7 @@ class Table extends CakeTable
         return false;
     }// }}}
 
-    /**  {{{ updateAll
+    /** {{{ updateAll
      * {@inheritDoc}
      */
     public function updateAll($fields, $conditions)
