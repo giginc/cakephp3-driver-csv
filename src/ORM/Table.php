@@ -197,7 +197,26 @@ class Table extends CakeTable
      */
     public function find($type = 'all', $options = [])
     {
-        return false;
+        $file = $this->query();
+        $primaryColumNumber = array_search($this->_primaryKey, $this->_schema);
+        $count = 1;
+        $response = [];
+        while (($data = fgetcsv($file, $this->_fileLength, $this->_delimiter)) !== FALSE) {
+            if ($count === $this->_schemaRow) {
+                $count++;
+                continue; // skip schema row
+            }
+            $row = [];
+            foreach ($this->_schema as $key => $value) {
+                $row[$value] = $data[$key];
+            }
+
+            $response[] = $row;
+            $count++;
+        }
+        $this->_disconnect();
+
+        return $response;
     }// }}}
 
     /** {{{ get
@@ -213,11 +232,11 @@ class Table extends CakeTable
     {
         $file = $this->query();
         $primaryColumNumber = array_search($this->_primaryKey, $this->_schema);
-        $row = 1;
+        $count = 1;
         $response = [];
         while (($data = fgetcsv($file, $this->_fileLength, $this->_delimiter)) !== FALSE) {
-            if ($row === $this->_schemaRow) {
-                $row++;
+            if ($count === $this->_schemaRow) {
+                $count++;
                 continue; // skip schema row
             }
             if (isset($data[$primaryColumNumber]) && $data[$primaryColumNumber] == $primaryKey) {
@@ -228,7 +247,7 @@ class Table extends CakeTable
                 $this->_disconnect();
                 return $response;
             }
-            $row++;
+            $count++;
         }
         $this->_disconnect();
 
