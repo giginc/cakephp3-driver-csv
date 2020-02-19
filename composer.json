@@ -2,7 +2,6 @@
     "name": "giginc/cakephp3-driver-csv",
     "description": "An CSV datasource for CakePHP 3.0",
     "type": "cakephp-plugin",
-    "version": "1.0.0",
     "keywords": [
         "cakephp",
         "cakephp-plugin",
