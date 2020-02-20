@@ -169,12 +169,12 @@ class Table extends CakeTable
      */
     public function find($type = 'all', $options = [])
     {
+        $entity = $this->getEntityClass();
         $csv = $this->_getConnection();
-        $query = $this->query()
-            ;
+        $query = $this->query();
         $records = $query->process($csv);
         foreach ($records->getRecords($this->_schema) as $record) {
-            $response[] = (object) $record;
+            $response[] = new $entity($record);
         }
         $this->_disconnect();
 
@@ -191,11 +191,11 @@ class Table extends CakeTable
      */
     public function get($primaryKey, $options = [])
     {
+        $entity = $this->getEntityClass();
         $csv = $this->_getConnection();
         $primaryColumNumber = array_search($this->_primaryKey, $this->_schema);
         $primaryKeyField = $this->_primaryKey;
-        $query = $this->query()
-            ;
+        $query = $this->query();
         $records = $query->process($csv);
         foreach ($records->getRecords($this->_schema) as $record) {
             if (isset($record[$this->_primaryKey])) {
@@ -204,7 +204,7 @@ class Table extends CakeTable
 
                 if ($recordPrimaryKey === $primaryKey) {
                     $this->_disconnect();
-                    return  (object) $record;
+                    return  new $entity($record);
                 }
             }
         }
