@@ -1,7 +1,7 @@
 <?php
-
 namespace Giginc\Csv\Database\Driver;
 
+use League\Csv\Reader;
 use Exception;
 
 class Csv
@@ -88,7 +88,7 @@ class Csv
             $path = realpath($this->_config['baseDir']). DIRECTORY_SEPARATOR. $name. ".csv";
 
             if (file_exists($path)) {
-                if (($this->_csv = new \SplFileObject($path)) === false) {
+                if (($this->_csv = Reader::createFromPath($path, 'r')) === false) {
                     trigger_error("Could not open file.{$path}");
 
                     return false;
@@ -99,12 +99,6 @@ class Csv
                 return false;
             }
 
-            $this->_csv->setFlags(
-                \SplFileObject::READ_CSV
-                | \SplFileObject::READ_AHEAD
-                | \SplFileObject::SKIP_EMPTY
-                | \SplFileObject::DROP_NEW_LINE
-            );
             $this->connected = true;
         } catch (Exception $e) {
             trigger_error($e->getMessage());
