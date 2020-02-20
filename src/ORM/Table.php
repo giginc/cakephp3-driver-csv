@@ -200,6 +200,8 @@ class Table extends CakeTable
         foreach ($records->getRecords($this->_schema) as $record) {
             if (isset($record[$this->_primaryKey])) {
                 $recordPrimaryKey = ctype_digit($record[$this->_primaryKey]) ? (int) $record[$this->_primaryKey] : $record[$this->_primaryKey];
+                $primaryKey = ctype_digit($primaryKey) ? (int) $primaryKey : $primaryKey;
+
                 if ($recordPrimaryKey === $primaryKey) {
                     $this->_disconnect();
                     return  $record;
@@ -210,10 +212,6 @@ class Table extends CakeTable
 
         return false;
     }// }}}
-   public function where(array $options = [])
-   {
-   }
-
     /** {{{ delete
      * remove one document
      *
@@ -226,7 +224,6 @@ class Table extends CakeTable
     {
         return false;
     }// }}}
-
     /** {{{ deleteAll
      * delete all rows matching $conditions
      * @param $conditions
@@ -237,7 +234,6 @@ class Table extends CakeTable
     {
         return false;
     }// }}}
-
     /** {{{ seve
      * save the document
      *
@@ -251,7 +247,6 @@ class Table extends CakeTable
     {
         return false;
     }// }}}
-
     /** {{{ updateAll
      * {@inheritDoc}
      */
