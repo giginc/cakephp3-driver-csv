@@ -174,7 +174,7 @@ class Table extends CakeTable
             ;
         $records = $query->process($csv);
         foreach ($records->getRecords($this->_schema) as $record) {
-            $response[] = $record;
+            $response[] = (object) $record;
         }
         $this->_disconnect();
 
@@ -204,7 +204,7 @@ class Table extends CakeTable
 
                 if ($recordPrimaryKey === $primaryKey) {
                     $this->_disconnect();
-                    return  $record;
+                    return  (object) $record;
                 }
             }
         }
