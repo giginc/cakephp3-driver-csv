@@ -1,5 +1,4 @@
 <?php
-
 namespace Giginc\Csv\ORM;
 
 use BadMethodCallException;
@@ -7,7 +6,7 @@ use Cake\Datasource\EntityInterface;
 use Cake\Datasource\Exception\InvalidPrimaryKeyException;
 use Cake\ORM\Table as CakeTable;
 use Exception;
-use League\Csv\Statement;
+use Giginc\Csv\ORM\Statement;
 use Giginc\Csv\Database\Driver\Csv;
 
 class Table extends CakeTable
@@ -61,10 +60,10 @@ class Table extends CakeTable
 
         return $this->_csv;
     }// }}}
-    /** {{{ _disconnect
+    /** {{{ disconnect
      * Closes the current datasource connection.
      */
-    private function _disconnect()
+    public function disconnect()
     {
         $this->_driver->disconnect();
     }// }}}
@@ -111,7 +110,7 @@ class Table extends CakeTable
      */
     public function query()
     {
-        return new Statement();
+        return new Statement($this->_getConnection(), $this);
     }// }}}
     /** {{{ getSchema
      * Returns the schema table object describing this table's properties.
@@ -129,6 +128,7 @@ class Table extends CakeTable
                 $this->_schema = range(0, count($schema));
             }
         }
+        return $this->_schema;
     }// }}}
     /** {{{ setSchema
      * Sets the schema table object describing this table's properties.
@@ -169,16 +169,9 @@ class Table extends CakeTable
      */
     public function find($type = 'all', $options = [])
     {
-        $entity = $this->getEntityClass();
-        $csv = $this->_getConnection();
         $query = $this->query();
-        $records = $query->process($csv);
-        foreach ($records->getRecords($this->_schema) as $record) {
-            $response[] = new $entity($record);
-        }
-        $this->_disconnect();
-
-        return $response;
+        $query->select($options);
+        return $query;
     }// }}}
     /** {{{ get
      * get the document by _id
@@ -191,26 +184,8 @@ class Table extends CakeTable
      */
     public function get($primaryKey, $options = [])
     {
-        $entity = $this->getEntityClass();
-        $csv = $this->_getConnection();
-        $primaryColumNumber = array_search($this->_primaryKey, $this->_schema);
-        $primaryKeyField = $this->_primaryKey;
         $query = $this->query();
-        $records = $query->process($csv);
-        foreach ($records->getRecords($this->_schema) as $record) {
-            if (isset($record[$this->_primaryKey])) {
-                $recordPrimaryKey = ctype_digit($record[$this->_primaryKey]) ? (int) $record[$this->_primaryKey] : $record[$this->_primaryKey];
-                $primaryKey = ctype_digit($primaryKey) ? (int) $primaryKey : $primaryKey;
-
-                if ($recordPrimaryKey === $primaryKey) {
-                    $this->_disconnect();
-                    return  new $entity($record);
-                }
-            }
-        }
-        $this->_disconnect();
-
-        return false;
+        return $query->get($primaryKey, $options);
     }// }}}
     /** {{{ delete
      * remove one document
