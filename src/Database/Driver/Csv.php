@@ -6,6 +6,12 @@ namespace Giginc\Csv\Database\Driver;
 use Exception;
 use League\Csv\Reader;
 
+/**
+ * Csv
+ *
+ * @copyright Copyright (c) 2020,GIG inc.
+ * @author Shota KAGAWA <kagawa@giginc.co.jp>
+ */
 class Csv
 {
     /**

@@ -6,6 +6,13 @@ namespace Giginc\Csv\Database;
 use Cake\Database\Exception\MissingConnectionException;
 use Giginc\Csv\Database\Driver\Csv;
 
+/**
+ * Connection
+ *
+ * @package Connection
+ * @copyright Copyright (c) 2020,GIG inc.
+ * @author Shota KAGAWA <kagawa@giginc.co.jp>
+ */
 class Connection extends \Cake\Database\Connection
 {
     /**

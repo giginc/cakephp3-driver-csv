@@ -3,12 +3,20 @@ declare(strict_types=1);
 
 namespace Giginc\Csv\ORM;
 
+use BadMethodCallException;
 use Cake\Datasource\EntityInterface;
 use Cake\ORM\Table as CakeTable;
 use Exception;
 use Giginc\Csv\Database\Driver\Csv;
 use League\Csv\Statement;
 
+/**
+ * Table
+ *
+ * @uses CakeTable
+ * @copyright Copyright (c) 2020,GIG inc.
+ * @author Shota KAGAWA <kagawa@giginc.co.jp>
+ */
 class Table extends CakeTable
 {
     protected $_driver;
@@ -194,6 +202,20 @@ class Table extends CakeTable
         $entity = $this->getEntityClass();
         $csv = $this->_getConnection();
         $query = $this->query();
+
+        if ($type == 'all') {
+           // does nothing when type is all
+        } else {
+            $finder = 'find' . ucfirst($type);
+            if (method_exists($this, $finder)) {
+                $query = $this->{$finder}($query, $options);
+            } else {
+                throw new BadMethodCallException(
+                    sprintf('Unknown finder method "%s"', $type)
+                );
+            }
+        }
+
         $records = $query->process($csv);
         foreach ($records->getRecords($this->_schema) as $record) {
             $response[] = new $entity($record);
