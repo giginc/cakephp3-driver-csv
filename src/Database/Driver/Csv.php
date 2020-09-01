@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 namespace Giginc\Csv\Database\Driver;
 
-use League\Csv\Reader;
 use Exception;
+use League\Csv\Reader;
 
 class Csv
 {
@@ -20,7 +22,7 @@ class Csv
      * true - yes
      * false - nope, and we can't connect
      *
-     * @var boolean
+     * @var bool
      * @access public
      */
     public $connected = false;
@@ -28,11 +30,10 @@ class Csv
     /**
      * File Instance
      *
-     * @var File
+     * @var \Giginc\Csv\Database\Driver\File
      * @access protected
      */
     protected $_csv = null;
-
 
     /**
      * Base Config
@@ -52,7 +53,7 @@ class Csv
     /**
      * Direct connection with database
      *
-     * @var mixed null | Mongo
+     * @var mixed null | Csv
      * @access private
      */
     private $connection = null;
@@ -79,16 +80,18 @@ class Csv
     /**
      * connect to the database
      *
-     * @return bool
+     * @param string $name Csv file name.
      * @access public
+     * @return bool
      */
-    public function connect($name)
+    public function connect(string $name)
     {
         try {
-            $path = realpath($this->_config['baseDir']). DIRECTORY_SEPARATOR. $name. ".csv";
+            $path = realpath($this->_config['baseDir']) . DIRECTORY_SEPARATOR . $name . ".csv";
 
             if (file_exists($path)) {
-                if (($this->_csv = Reader::createFromPath($path, 'r')) === false) {
+                $this->_csv = Reader::createFromPath($path, 'r');
+                if ($this->_csv === false) {
                     trigger_error("Could not open file.{$path}");
 
                     return false;
@@ -110,7 +113,9 @@ class Csv
     /**
      * return Csv file
      *
+     * @param string $name Csv file name.
      * @access public
+     * @return \Giginc\Csv\Database\Driver\File
      */
     public function getConnection($name)
     {

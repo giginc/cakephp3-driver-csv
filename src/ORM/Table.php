@@ -1,14 +1,13 @@
 <?php
+declare(strict_types=1);
 
 namespace Giginc\Csv\ORM;
 
-use BadMethodCallException;
 use Cake\Datasource\EntityInterface;
-use Cake\Datasource\Exception\InvalidPrimaryKeyException;
 use Cake\ORM\Table as CakeTable;
 use Exception;
-use League\Csv\Statement;
 use Giginc\Csv\Database\Driver\Csv;
+use League\Csv\Statement;
 
 class Table extends CakeTable
 {
@@ -33,11 +32,11 @@ class Table extends CakeTable
      */
     protected $_schema;
 
-    /** {{{ _getConnection
+    /**
      * return Csv file
      *
-     * @return file
-     * @throws Exception
+     * @return \Giginc\Csv\ORM\file
+     * @throws \Exception
      */
     private function _getConnection()
     {
@@ -60,63 +59,83 @@ class Table extends CakeTable
         $this->getSchema();
 
         return $this->_csv;
-    }// }}}
-    /** {{{ _disconnect
+    }
+
+    /**
      * Closes the current datasource connection.
+     *
+     * @access private
+     * @return void
      */
     private function _disconnect()
     {
         $this->_driver->disconnect();
-    }// }}}
-    /** {{{ setDelimiter
+    }
+
+    /**
      * Set delimiter
      *
-     * @param string $delimiter
+     * @param string $delimiter Delimiter.
+     * @access public
+     * @return void
      */
     public function setDelimiter($delimiter)
     {
         $this->_delimiter = $delimiter;
-    }// }}}
-    /** {{{ setEnclosure
+    }
+
+    /**
      * Set enclosure
      *
-     * @param string $enclosure
+     * @param string $enclosure Enclosure.
+     * @access public
+     * @return void
      */
     public function setEnclosure($enclosure)
     {
         $this->_enclosure = $enclosure;
-    }// }}}
-    /** {{{ setEscape
+    }
+
+    /**
      * Set escape
      *
-     * @param string $escape
+     * @param string $escape Escape.
+     * @access public
+     * @return void
      */
     public function setEscape($escape)
     {
         $this->_escape = $escape;
-    }// }}}
-    /** {{{ setSchemaRow
+    }
+
+    /**
      * Set schema row
      *
-     * @param integer $schemaRow
+     * @param int $schemaRow Schema row.
+     * @access public
+     * @return void
      */
     public function setSchemaRow($schemaRow)
     {
         $this->_schemaRow = $schemaRow;
-    }// }}}
-    /** {{{ query
+    }
+
+    /**
      * Creates a new Query instance for a table.
      *
-     * @return \Cake\ORM\Query
+     * @access public
+     * @return \League\Csv\Statement
      */
     public function query()
     {
         return new Statement();
-    }// }}}
-    /** {{{ getSchema
+    }
+
+    /**
      * Returns the schema table object describing this table's properties.
      *
-     * @return \Cake\Database\Schema\TableSchema
+     * @access public
+     * @return void
      */
     public function getSchema()
     {
@@ -129,8 +148,9 @@ class Table extends CakeTable
                 $this->_schema = range(0, count($schema));
             }
         }
-    }// }}}
-    /** {{{ setSchema
+    }
+
+    /**
      * Sets the schema table object describing this table's properties.
      *
      * If an array is passed, a new TableSchema will be constructed
@@ -146,25 +166,27 @@ class Table extends CakeTable
         }
 
         return $this;
-    }// }}}
-    /** {{{ hasField
+    }
+
+    /**
      * always return true because Csv is schemaless
      *
-     * @param string $field
-     * @return bool
+     * @param string $field Field name.
      * @access public
+     * @return bool
      */
     public function hasField($field)
     {
         return true;
-    }// }}}
-    /** {{{ find
+    }
+
+    /**
      * find documents
      *
-     * @param string $type
-     * @param array $options
-     * @return Array
+     * @param string $type Type.
+     * @param array $options Option.
      * @access public
+     * @return array
      * @throws \Exception
      */
     public function find($type = 'all', $options = [])
@@ -179,14 +201,15 @@ class Table extends CakeTable
         $this->_disconnect();
 
         return $response;
-    }// }}}
-    /** {{{ get
+    }
+
+    /**
      * get the document by _id
      *
-     * @param string $primaryKey
-     * @param array $options
-     * @return \Cake\ORM\Entity
+     * @param string $primaryKey Primary key.
+     * @param array $options Option.
      * @access public
+     * @return \Cake\ORM\Entity
      * @throws \Exception
      */
     public function get($primaryKey, $options = [])
@@ -199,60 +222,71 @@ class Table extends CakeTable
         $records = $query->process($csv);
         foreach ($records->getRecords($this->_schema) as $record) {
             if (isset($record[$this->_primaryKey])) {
-                $recordPrimaryKey = ctype_digit($record[$this->_primaryKey]) ? (int) $record[$this->_primaryKey] : $record[$this->_primaryKey];
-                $primaryKey = ctype_digit($primaryKey) ? (int) $primaryKey : $primaryKey;
+                $recordPrimaryKey = ctype_digit($record[$this->_primaryKey])
+                    ? (int)$record[$this->_primaryKey] : $record[$this->_primaryKey];
+                $primaryKey = ctype_digit($primaryKey) ? (int)$primaryKey : $primaryKey;
 
                 if ($recordPrimaryKey === $primaryKey) {
                     $this->_disconnect();
-                    return  new $entity($record);
+
+                    return new $entity($record);
                 }
             }
         }
         $this->_disconnect();
 
         return false;
-    }// }}}
-    /** {{{ delete
+    }
+
+    /**
      * remove one document
      *
-     * @param \Cake\Datasource\EntityInterface $entity
-     * @param array $options
-     * @return bool
+     * @param \Cake\Datasource\EntityInterface $entity Entity.
+     * @param array $options Option.
      * @access public
+     * @return bool
      */
     public function delete(EntityInterface $entity, $options = [])
     {
         return false;
-    }// }}}
-    /** {{{ deleteAll
+    }
+
+    /**
      * delete all rows matching $conditions
-     * @param $conditions
-     * @return int
-     * @throws \Exception
+     *
+     * @param array|null $conditions Condition.
+     * @access public
+     * @return bool
      */
     public function deleteAll($conditions = null)
     {
         return false;
-    }// }}}
-    /** {{{ seve
+    }
+
+    /**
      * save the document
      *
-     * @param EntityInterface $entity
-     * @param array $options
-     * @return mixed $success
+     * @param \Cake\Datasource\EntityInterface $entity Entity.
+     * @param array $options Option.
+     * @return bool
      * @access public
      * @throws \Exception
      */
     public function save(EntityInterface $entity, $options = [])
     {
         return false;
-    }// }}}
-    /** {{{ updateAll
-     * {@inheritDoc}
+    }
+
+    /**
+     * update all document
+     *
+     * @param array $fields Field.
+     * @param array $conditions Condition.
+     * @access public
+     * @return bool
      */
     public function updateAll($fields, $conditions)
     {
         return false;
-    }// }}}
+    }
 }
-/* vim:set foldmethod=marker tabstop=4 shiftwidth=4 autoindent :*/

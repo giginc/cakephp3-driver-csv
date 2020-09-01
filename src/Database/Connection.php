@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Giginc\Csv\Database;
 
@@ -7,7 +8,6 @@ use Giginc\Csv\Database\Driver\Csv;
 
 class Connection extends \Cake\Database\Connection
 {
-
     /**
      * Contains the configuration param for this connection
      *
@@ -18,7 +18,7 @@ class Connection extends \Cake\Database\Connection
     /**
      * Database Driver object
      *
-     * @var Csv;
+     * @var \Giginc\Csv\Database\Driver\Csv ;
      */
     protected $_driver = null;
 
@@ -61,7 +61,7 @@ class Connection extends \Cake\Database\Connection
     /**
      * @param null $driver driver
      * @param array $config configuration
-     * @return Csv|resource
+     * @return \Giginc\Csv\Database\Driver\Csv|resource
      */
     public function driver($driver = null, $config = [])
     {
@@ -93,7 +93,7 @@ class Connection extends \Cake\Database\Connection
     /**
      * disconnect from the database
      *
-     * @return boole
+     * @return \Giginc\Csv\Database\boole
      * @access public
      */
     public function disconnect()
@@ -119,9 +119,9 @@ class Connection extends \Cake\Database\Connection
     /**
      * Csv doesn't support transaction
      *
-     * @param callable $transaction
-     * @return false
+     * @param callable $transaction Transaction.
      * @access public
+     * @return false
      */
     public function transactional(callable $transaction)
     {
@@ -131,7 +131,7 @@ class Connection extends \Cake\Database\Connection
     /**
      * Csv doesn't support foreign keys
      *
-     * @param callable $operation
+     * @param callable $operation Operation.
      * @return false
      * @access public
      */
@@ -141,8 +141,11 @@ class Connection extends \Cake\Database\Connection
     }
 
     /**
-     * @param null $table
-     * @param null $column
+     * lastInsertId
+     *
+     * @param null $table Table.
+     * @param null $column Column.
+     * @access public
      * @return int|string|void
      */
     public function lastInsertId($table = null, $column = null)
