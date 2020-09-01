@@ -65,6 +65,24 @@ class ProductsTable extends Table
     {
         return 'csv';
     }
+
+    /**
+     * findOk
+     *
+     * @param \League\Csv\Statement $query Query.
+     * @param array $options Option.
+     * @access public
+     * @return \Cake\ORM\Query
+     */
+    public function findOk($query, array $options)
+    {
+        $query = $query
+            ->where(function(array $row) {
+                return $row['status'] == 'ok';
+            });
+
+        return $query;
+    }
 }
 ```
 
@@ -87,13 +105,28 @@ class PagesController extends AppController
     /**
      * Index method
      *
+     * @access public
      * @return \Cake\Http\Response|void
      */
     public function index()
     {
         $this->loadModel('Products');
+        $data = $this->Products->find();
+    }
+
+    /**
+     * View method
+     *
+     * @param mixed $id
+     * @access public
+     * @return \Cake\Http\Response|void
+     */
+    public function view($id)
+    {
+        $this->loadModel('Products');
         $data = $this->Products->get(1);
     }
+
 }
 ```
 
