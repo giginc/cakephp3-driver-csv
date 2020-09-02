@@ -8,7 +8,6 @@ use Cake\Datasource\EntityInterface;
 use Cake\ORM\Table as CakeTable;
 use Exception;
 use Giginc\Csv\Database\Driver\Csv;
-use League\Csv\Statement;
 
 /**
  * Table
@@ -72,10 +71,10 @@ class Table extends CakeTable
     /**
      * Closes the current datasource connection.
      *
-     * @access private
+     * @access public
      * @return void
      */
-    private function _disconnect()
+    public function disconnect()
     {
         $this->_driver->disconnect();
     }
@@ -132,18 +131,18 @@ class Table extends CakeTable
      * Creates a new Query instance for a table.
      *
      * @access public
-     * @return \League\Csv\Statement
+     * @return \Cake\ORM\Query
      */
     public function query()
     {
-        return new Statement();
+        return new Statement($this->_getConnection(), $this);
     }
 
     /**
      * Returns the schema table object describing this table's properties.
      *
      * @access public
-     * @return void
+     * @return \Cake\Database\Schema\TableSchema
      */
     public function getSchema()
     {
@@ -156,6 +155,8 @@ class Table extends CakeTable
                 $this->_schema = range(0, count($schema));
             }
         }
+
+        return $this->_schema;
     }
 
     /**
@@ -199,16 +200,14 @@ class Table extends CakeTable
      */
     public function find($type = 'all', $options = [])
     {
-        $entity = $this->getEntityClass();
-        $csv = $this->_getConnection();
         $query = $this->query();
 
         if ($type == 'all') {
-           // does nothing when type is all
+            $query->select($options);
         } else {
             $finder = 'find' . ucfirst($type);
             if (method_exists($this, $finder)) {
-                $query = $this->{$finder}($query, $options);
+                $this->{$finder}($query, $options);
             } else {
                 throw new BadMethodCallException(
                     sprintf('Unknown finder method "%s"', $type)
@@ -216,13 +215,7 @@ class Table extends CakeTable
             }
         }
 
-        $records = $query->process($csv);
-        foreach ($records->getRecords($this->_schema) as $record) {
-            $response[] = new $entity($record);
-        }
-        $this->_disconnect();
-
-        return $response;
+        return $query;
     }
 
     /**
@@ -236,28 +229,9 @@ class Table extends CakeTable
      */
     public function get($primaryKey, $options = [])
     {
-        $entity = $this->getEntityClass();
-        $csv = $this->_getConnection();
-        $primaryColumNumber = array_search($this->_primaryKey, $this->_schema);
-        $primaryKeyField = $this->_primaryKey;
         $query = $this->query();
-        $records = $query->process($csv);
-        foreach ($records->getRecords($this->_schema) as $record) {
-            if (isset($record[$this->_primaryKey])) {
-                $recordPrimaryKey = ctype_digit($record[$this->_primaryKey])
-                    ? (int)$record[$this->_primaryKey] : $record[$this->_primaryKey];
-                $primaryKey = ctype_digit($primaryKey) ? (int)$primaryKey : $primaryKey;
 
-                if ($recordPrimaryKey === $primaryKey) {
-                    $this->_disconnect();
-
-                    return new $entity($record);
-                }
-            }
-        }
-        $this->_disconnect();
-
-        return false;
+        return $query->get($primaryKey, $options);
     }
 
     /**
@@ -279,6 +253,7 @@ class Table extends CakeTable
      * @param array|null $conditions Condition.
      * @access public
      * @return bool
+     * @throws \Exception
      */
     public function deleteAll($conditions = null)
     {
